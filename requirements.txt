@@ -3,3 +3,8 @@ langchain
 chainlit
 pydantic
 openai
+crewai
+crewai_tools
+langchain_community
+groq
+markdown_pdf
