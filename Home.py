@@ -21,6 +21,7 @@ from langchain_community.tools import DuckDuckGoSearchRun
 from crewai import Crew, Process, Agent, Task
 from langchain_community.tools import DuckDuckGoSearchRun
 search_tool = DuckDuckGoSearchRun()
+from fpdf import FPDF
 #Importing from SRC
 # from src.crews.agents import researcher, insight_researcher, writer, formater
 # from src.crews.task import research_task, insights_task, writer_task, format_task
@@ -75,6 +76,14 @@ class CustomHandler(BaseCallbackHandler):
     def on_chain_end(self, outputs: Dict[str, Any], **kwargs: Any) -> None:
         st.session_state.messages.append({"role": self.agent_name, "content": outputs['output']})
         st.chat_message(self.agent_name).write(outputs['output'])
+        
+        
+# def generate_pdf(text):
+#     pdf = FPDF()
+#     pdf.add_page()
+#     pdf.set_font("Arial", size=12)
+#     pdf.cell(200, 10, txt=text, ln=True, align='C')
+#     return pdf.output(dest='S').encode('latin-1')
 
 # Main function to run the Streamlit app
 def main():
@@ -180,12 +189,42 @@ def main():
         if blog_topic:
             result = tech_crew.kickoff()
             st.write(result)
+            
+            # Create a PDF and write the output to it
+            pdf = FPDF()
+            pdf.add_page()
+            pdf.set_font("Arial", size=12)
+
+            for line in result.split("\n"):
+                pdf.write(5, line)
+                pdf.ln()  # move to next line
+
+            # Save the PDF file
+            pdf.output("blog.pdf")
+            file_path = './blog.pdf'
+            with open(file_path, 'rb') as file:
+                file_content = file.read()
+
+            # Create download button
+            st.download_button(
+                label="Download blog.pdf",
+                data=file_content,
+                file_name="blog.pdf",
+                mime="application/pdf"
+            )
+                
+            
         else:
             st.error("Please enter a blog topic.")
             
-    with st.sidebar:
-        
-        footer()
+    
 
 if __name__ == "__main__":
     main()
+    with st.sidebar:
+        
+        footer()
+        
+        
+        
+        
