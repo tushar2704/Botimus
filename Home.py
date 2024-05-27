@@ -12,14 +12,12 @@ import logging
 import warnings
 from dotenv import load_dotenv
 from typing import Any, Dict
-
 import google.generativeai as genai
 from langchain_core.callbacks import BaseCallbackHandler
 from langchain_openai import ChatOpenAI
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import HumanMessage
 from langchain_community.tools import DuckDuckGoSearchRun
-
 from crewai import Crew, Process, Agent, Task
 from langchain_community.tools import DuckDuckGoSearchRun
 search_tool = DuckDuckGoSearchRun()
@@ -27,7 +25,7 @@ search_tool = DuckDuckGoSearchRun()
 # from src.crews.agents import researcher, insight_researcher, writer, formater
 # from src.crews.task import research_task, insights_task, writer_task, format_task
 # from src.crews.crew import botimus_crew
-
+from src.components.navigation import footer, custom_style, page_config
 ##################################################################################################
 ##################################################################################################
 # Configure logging
@@ -35,50 +33,31 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 logger = logging.getLogger(__name__)
 ##################################################################################################
 ##################################################################################################
-#Environmental variables
+#Environmental variables For developing and testing
 # load_dotenv()
 # google_api_key = os.getenv("GOOGLE_API_KEY")
 ##################################################################################################
 ##################################################################################################
 
-#Check if api key loaded successfully with logging info
+#Check if api key loaded successfully with logging info For developing and testing
 # if google_api_key:
 #     logger.info("Google API Key loaded successfully.")
 # else:
 #     logger.error("Failed to load Google API Key.")
 ##################################################################################################
 #Intializing llm
+page_config("Botimus", "🤖", "wide")
+custom_style()
+st.sidebar.image('./src/logo.png')
 google_api_key = st.sidebar.text_input("Enter your GeminiPro API key:", type="password")
+
 llm = ChatGoogleGenerativeAI(model="gemini-pro", verbose=True, 
                              temperature=0.2, google_api_key=google_api_key)
 
 
-
-
-
 ##################################################################################################
 
 
-
-# Custom Handler for logging interactions
-# class CustomHandler(BaseCallbackHandler):
-#     def __init__(self, agent_name: str) -> None:
-#         super().__init__()
-#         self.agent_name = agent_name
-
-#     def on_chain_start(self, serialized: Dict[str, Any], outputs: Dict[str, Any], **kwargs: Any) -> None:
-#         st.session_state.messages.append({"role": "assistant", "content": outputs['input']})
-#         st.chat_message("assistant").write(outputs['input'])
-
-#     def on_agent_action(self, serialized: Dict[str, Any], inputs: Dict[str, Any], **kwargs: Any) -> None:
-#         st.session_state.messages.append({"role": "assistant", "content": inputs['input']})
-#         st.chat_message("assistant").write(inputs['input'])
-
-#     def on_chain_end(self, outputs: Dict[str, Any], **kwargs: Any) -> None:
-#         st.session_state.messages.append({"role": self.agent_name, "content": outputs['output']})
-#         st.chat_message(self.agent_name).write(outputs['output'])
-##################################################################################################
-# Main function to run the Streamlit app
 # Custom Handler for logging interactions
 class CustomHandler(BaseCallbackHandler):
     def __init__(self, agent_name: str) -> None:
@@ -99,8 +78,20 @@ class CustomHandler(BaseCallbackHandler):
 
 # Main function to run the Streamlit app
 def main():
-    st.title("CrewAI Blogging Crew")
-    st.write("This app helps you generate blog content using AI agents.")
+    st.title("🤖Botimus🤖")
+    st.markdown('''
+            <style>
+                div.block-container{padding-top:0px;}
+                font-family: 'Roboto', sans-serif; /* Add Roboto font */
+                color: blue; /* Make the text blue */
+            </style>
+                ''',
+            unsafe_allow_html=True)
+    st.markdown(
+        """
+        ### Write Structured blogs with AI Agents, powered by Gemini Pro & CrewAI  [Towards-GenAI](https://github.com/Towards-GenAI)
+        """
+    )
 
     if 'messages' not in st.session_state:
         st.session_state.messages = []
@@ -117,7 +108,7 @@ def main():
         goal='Discover groundbreaking technologies',
         backstory='A curious mind fascinated by cutting-edge innovation and the potential to change the world, you know everything about tech.',
         verbose=True,
-        tools=[DuckDuckGoSearchRun()],
+        tools=[search_tool],
         allow_delegation=False,
         llm=llm
     )
@@ -188,6 +179,10 @@ def main():
             st.write(result)
         else:
             st.error("Please enter a blog topic.")
+            
+    with st.sidebar:
+        
+        footer()
 
 if __name__ == "__main__":
     main()

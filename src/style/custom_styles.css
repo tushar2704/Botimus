@@ -12,7 +12,7 @@
     margin: auto;
     font-family: 'Roboto', sans-serif;
     overflow: auto;
-    background-image: linear-gradient(180deg, rgb(244, 247, 249),#f6e6d4);
+    background-color: #E9A753;
     animation: gradient 15s ease infinite;
     background-attachment: fixed;
     
@@ -21,7 +21,7 @@
 
 /* Change the sidebar color*/
 [data-testid=stSidebar] {
-    background-image: linear-gradient(180deg, #fcfdf6 ,#ebeff4);
+    background-color: #D9CCC4;
     
   }
 
