@@ -46,7 +46,7 @@ logger = logging.getLogger(__name__)
 #     logger.error("Failed to load Google API Key.")
 ##################################################################################################
 #Intializing llm
-page_config("Botimus", "🤖", "wide")
+page_config("Botimmus", "🤖", "wide")
 custom_style()
 st.sidebar.image('./src/logo.png')
 google_api_key = st.sidebar.text_input("Enter your GeminiPro API key:", type="password")
@@ -78,7 +78,7 @@ class CustomHandler(BaseCallbackHandler):
 
 # Main function to run the Streamlit app
 def main():
-    st.title("🤖Botimus🤖")
+    st.title("🤖Botimmus🤖")
     st.markdown('''
             <style>
                 div.block-container{padding-top:0px;}
@@ -95,18 +95,21 @@ def main():
 
     if 'messages' not in st.session_state:
         st.session_state.messages = []
-
+    col1, col2 = st.columns(2)
     # Input for blog topic
-    blog_topic = st.text_input("Enter the blog topic:")
+    with col1:
+        blog_topic = st.text_input("Enter the blog topic:")
 
     # Dropdown for selecting the type of content
-    content_type = st.selectbox("Select the type of content:", ["Blog Post", "Research Paper", "Technical Report"])
+    with col2:
+        
+        content_type = st.selectbox("Select the type of content:", ["Blog Post", "Research Paper", "Technical Report"])
 
     # Create agents
     researcher = Agent(
         role='Senior Researcher',
-        goal='Discover groundbreaking technologies',
-        backstory='A curious mind fascinated by cutting-edge innovation and the potential to change the world, you know everything about tech.',
+        goal=f'Discover groundbreaking technologies and trends for {blog_topic}',
+        backstory='A seasoned researcher with a knack for uncovering the latest advancements in technology. You have a deep understanding of tech trends and their potential impacts.',
         verbose=True,
         tools=[search_tool],
         allow_delegation=False,
@@ -115,8 +118,8 @@ def main():
 
     insight_researcher = Agent(
         role='Insight Researcher',
-        goal='Discover Key Insights',
-        backstory='You are able to find key insights from the data you are given.',
+        goal=f'Extract key insights and data points for {blog_topic}',
+        backstory='An analytical expert who excels at distilling complex data into actionable insights. You have a keen eye for identifying significant trends and patterns.',
         verbose=True,
         allow_delegation=False,
         llm=llm
@@ -124,17 +127,17 @@ def main():
 
     writer = Agent(
         role='Tech Content Strategist',
-        goal='Craft compelling content on tech advancements',
-        backstory='You are a content strategist known for making complex tech topics interesting and easy to understand.',
+        goal=f'Craft compelling and engaging content on {blog_topic} using cutting-edge technology 2000 words length',
+        backstory='A renowned content strategist known for transforming complex tech concepts into captivating narratives. Your writing is both informative and accessible, appealing to a broad audience.',
         verbose=True,
         allow_delegation=False,
         llm=llm
     )
 
-    formater = Agent(
-        role='Markdown Formater',
-        goal='Format the text in markdown',
-        backstory='You are able to convert the text into markdown format',
+    formatter = Agent(
+        role='Markdown Formatter',
+        goal='Format the text in markdown for optimal readability and presentation',
+        backstory='An expert in formatting and presentation, ensuring that the content is visually appealing and easy to read.',
         verbose=True,
         allow_delegation=False,
         llm=llm
@@ -142,32 +145,32 @@ def main():
 
     # Define tasks with expected_output
     research_task = Task(
-        description=f'Identify the next big trend in AI related to {blog_topic} by searching the internet',
-        agent=researcher,
-        expected_output='A list of potential AI trends'
-    )
+    description=f'Conduct a comprehensive analysis of the latest advancements and trends related to {blog_topic}',
+    agent=researcher,
+    expected_output='A detailed list of potential AI and tech trends with supporting data'
+        )
 
     insights_task = Task(
-        description=f'Identify few key insights from the data related to {blog_topic} in points format. Don’t use any tool',
+        description=f'Identify key insights and data points from the research related to {blog_topic}',
         agent=insight_researcher,
-        expected_output='Key insights in bullet points'
+        expected_output='Key insights in bullet points with relevant data'
     )
 
     writer_task = Task(
-        description=f'Write a short {content_type} about {blog_topic} with subheadings. Don’t use any tool',
+        description=f'Write a well-structured {content_type.lower()} about {blog_topic} with subheadings and engaging content',
         agent=writer,
-        expected_output=f'A well-structured {content_type.lower()}'
+        expected_output=f'A polished and compelling {content_type.lower()}'
     )
 
     format_task = Task(
-        description='Convert the text into markdown format. Don’t use any tool',
-        agent=formater,
+        description='Convert the text into markdown format for optimal readability and presentation',
+        agent=formatter,
         expected_output='Formatted markdown text'
     )
 
     # Instantiate the crew
     tech_crew = Crew(
-        agents=[researcher, insight_researcher, writer, formater],
+        agents=[researcher, insight_researcher, writer, formatter],
         tasks=[research_task, insights_task, writer_task, format_task],
         process=Process.sequential  # Tasks will be executed one after the other
     )
